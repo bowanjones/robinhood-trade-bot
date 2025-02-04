@@ -11,6 +11,7 @@ Navigate to lines 136-139 of the robinhood-api.py file to select your crypto for
 ## Prerequisites
 
 Before running the bot, make sure you have the following:
+
 0. **Visual Studio Code:**
   - This is a personal preference but I find VS Code to be very user friendly. Download using the following:
   https://code.visualstudio.com/download
