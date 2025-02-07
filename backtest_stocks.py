@@ -115,6 +115,7 @@ def backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=10000, 
     final_balances = {}  # To store the final portfolio values for each stock
 
     total_gain_loss_all = 0  # Variable to track the total gain/loss across all symbols
+    symbol_percentage_returns = {}  # To store percentage returns for each symbol
 
     for symbol in symbols:
         print(f"\nStarting backtest for {symbol}...")
@@ -122,8 +123,13 @@ def backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=10000, 
         
         total_gain_loss_all += total_gain_loss  # Sum the total gain/loss for each stock
 
-        # Print the percentage return for this stock
-        print(f"Percentage Return for {symbol}: {percentage_return:.2f}%\n")
+        # Store the percentage return for this symbol
+        symbol_percentage_returns[symbol] = percentage_return
+
+    # Print summary of all percentage returns at the end
+    print("\nSummary of Percentage Returns for All Stocks:")
+    for symbol, percentage_return in symbol_percentage_returns.items():
+        print(f"{symbol}: {percentage_return:.2f}%")
 
     return total_gain_loss_all
 
