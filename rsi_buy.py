@@ -41,7 +41,7 @@ def fetch_and_analyze(symbol):
         print(f"RSI is in neutral range. No action required. (Timestamp: {current_timestamp})")
 
 # Define the symbol (you can change this to any symbol)
-symbol = 'GOOG'
+symbol = 'DOGE-USD'
 
 # Run the function every minute (adjust sleep for different intervals)
 while True:
