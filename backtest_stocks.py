@@ -14,7 +14,7 @@ def calculate_rsi(df, period=14):
     return df
 
 # Simple function to simulate a backtest with cash value and strategy conditions
-def simple_backtest(symbol, start_date, end_date, initial_cash=10000):
+def simple_backtest(symbol, start_date, end_date, initial_cash=10000, investment_per_stock=1000):
     # Download historical data for the backtest period
     df = yf.download(symbol, start=start_date, end=end_date, progress=False)
     
@@ -33,6 +33,12 @@ def simple_backtest(symbol, start_date, end_date, initial_cash=10000):
     buy_price = 0  # To store the price when a buy is made
 
     print(f"Data for {symbol} from {start_date} to {end_date}:")
+    
+    # Track the number of active positions in the portfolio (max 5)
+    active_stocks = 0
+    max_active_stocks = 5
+
+    total_gain_loss = 0  # Variable to track total gain/loss
 
     # Loop through the historical data and simulate buying/selling actions
     for i in range(1, len(df)):
@@ -52,60 +58,88 @@ def simple_backtest(symbol, start_date, end_date, initial_cash=10000):
             cash = cash.item()  # Convert to scalar if it's a Series
 
         # Buy when RSI is below 30 and there's enough cash to buy
-        if cash >= current_close and position == 0 and current_rsi < 30:
-            position = cash / current_close  # Buy the stock
+        if cash >= investment_per_stock and position == 0 and current_rsi < 30 and active_stocks < max_active_stocks:
+            position = investment_per_stock / current_close  # Buy the stock with $1,000 investment
             buy_price = current_close  # Store the buy price
-            cash = 0  # All cash is used for buying
+            cash -= investment_per_stock  # Deduct $1,000 from cash
+            active_stocks += 1  # Increase the active stock count
             cash_spent = buy_price * position
-            print(f"\t\033[92mBuy at {current_close}, Position: {position} shares, Cash Spent: {cash_spent:.2f} \033[0m")
+            print(f"\t\033[92mBuy\033[0m at {current_close:.2f} on {current_date}, Position: {position} shares, Cash Spent: \033[91m{cash_spent:.2f}\033[0m")
 
         # Sell when RSI is above 70
         elif position > 0 and current_rsi > 70:
-            cash = position * current_close  # Sell all stock at the current close price
-            position = 0  # No position left
+            # Calculate the total cash from selling all shares
+            cash_flow = current_close * position
+            cash += cash_flow  # Add cash to portfolio from the sale
+            gain_loss = (current_close - buy_price) * position  # Calculate the gain/loss on the sale
+            total_gain_loss += gain_loss  # Add this transaction's gain/loss to total
 
-            # Calculate the gain/loss on the sale
-            gain_loss = cash - (position * buy_price)
+            position = 0  # No position left
+            active_stocks -= 1  # Decrease the active stock count
+
+            # Print the sell result with cash gained
             if gain_loss > 0:
-                print(f"\t\033[91mSell at {current_close}, Gain: {gain_loss:.2f}, Cash: {cash}\033[0m")
+                print(f"\t\033[91mSell\033[0m at {current_close:.2f} on {current_date}, \033[92mGain:\033[0m {gain_loss:.2f}, Cash Flow: {cash_flow:.2f}, Total Cash: {cash:.2f}")
             elif gain_loss < 0:
-                print(f"\t\033[91mSell at {current_close}, Loss: {abs(gain_loss):.2f}, Cash: {cash}\033[0m")
+                print(f"\t\033[91mSell\033[0m at {current_close:.2f}, \033[91mLoss:\033[0m {abs(gain_loss):.2f}, Cash Flow: {cash_flow:.2f}, Total Cash: {cash:.2f}")
             else:
-                print(f"\t\033[91mSell at {current_close}, No gain or loss, Cash: {cash}\033[0m")
+                print(f"\t\033[91mSell\033[0m at {current_close:.2f}, \033[93mNo gain or loss, Cash Flow:\033[0m {cash_flow:.2f}, Total Cash: {cash:.2f}")
 
         # Append portfolio info for analysis
         history.append({'date': current_date, 'cash': cash, 'position': position, 'portfolio_value': portfolio_value})
 
-    return pd.DataFrame(history)
+    # In the 'simple_backtest' function, modify the final row calculation
+    final_row = {
+        'date': df.index[-1],  # Last date in the dataset
+        'cash': cash,
+        'position': position,  # Final stock position
+        'portfolio_value': portfolio_value  # Final portfolio value (includes unsold stocks)
+    }
+    history.append(final_row)
+
+    # Calculate the final portfolio value including unsold stocks
+    if position > 0:
+        # Calculate value of unsold stock at the current close price
+        final_portfolio_value = cash + (position * df['Close'].iloc[-1].item())  # Value of unsold stocks + cash
+    else:
+        final_portfolio_value = cash  # If no stocks are left, just return cash
+
+    # Calculate the percentage return
+    percentage_return = ((final_portfolio_value - initial_cash) / initial_cash) * 100
+
+    return pd.DataFrame(history), final_portfolio_value, total_gain_loss, percentage_return  # Return percentage return
 
 # Function to backtest multiple stocks
-def backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=10000):
+def backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=10000, investment_per_stock=1000):
     all_results = []  # To store the results for all stocks
+    final_balances = {}  # To store the final portfolio values for each stock
+
+    total_gain_loss_all = 0  # Variable to track the total gain/loss across all symbols
 
     for symbol in symbols:
         print(f"\nStarting backtest for {symbol}...")
-        df = simple_backtest(symbol, start_date, end_date, initial_cash)
+        df, final_value, total_gain_loss, percentage_return = simple_backtest(symbol, start_date, end_date, initial_cash, investment_per_stock)
+        
+        total_gain_loss_all += total_gain_loss  # Sum the total gain/loss for each stock
 
-        if df is not None:
-            df['symbol'] = symbol  # Add a column to track the symbol
-            all_results.append(df)  # Add the result for this stock
+        # Print the percentage return for this stock
+        print(f"Percentage Return for {symbol}: {percentage_return:.2f}%\n")
 
-    # Combine all results into a single DataFrame
-    return pd.concat(all_results, ignore_index=True) if all_results else None
+    return total_gain_loss_all
 
 # List of symbols to backtest
-symbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'OKLO', 'SOUN', 'BBAI', 'WW', 'GM', 'JOBY', 'ACHR', 'APLD', 'QUBT', 'QBTS', 'ARBE', 'PLTR']
+symbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'OKLO', 'SOUN', 'BBAI', 'GM', 'JOBY', 'ACHR', 'QUBT', 'QBTS', 'PLTR']
 
 # Set the start and end dates for the backtest period
-start_date = "2025-02-06"
+start_date = "2024-01-01"
 end_date = "2025-02-07"
 
-# Set initial cash to $10,000
-results = backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=1000)
+# Set initial cash and investment per stock as variables
+initial_cash = 5000  # Total initial cash available for backtesting
+investment_per_stock = 1000  # Amount to invest per stock
 
-# Print the final results
-if results is not None:
-    for symbol in symbols:
-        symbol_results = results[results['symbol'] == symbol]
-        total_return = (symbol_results['portfolio_value'].iloc[-1] - 1000) / 1000 * 100
-        print(f"Total Return for {symbol}: {total_return:.2f}%")
+# Run the backtest
+total_gain_loss_all = backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=initial_cash, investment_per_stock=investment_per_stock)
+
+# Output total portfolio gain/loss from all symbols
+print(f"\nTotal Portfolio Gain/Loss (all symbols): {total_gain_loss_all:.2f}")
