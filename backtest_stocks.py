@@ -145,7 +145,8 @@ initial_cash = 5000  # Total initial cash available for backtesting
 investment_per_stock = 1000  # Amount to invest per stock
 
 # Run the backtest
-total_gain_loss_all = backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=initial_cash, investment_per_stock=investment_per_stock)
-
+total_gain_loss_all = backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=initial_cash, investment_per_stock=investment_per_stock)+initial_cash
+annual_growth = ((total_gain_loss_all-initial_cash)/initial_cash)*100
 # Output total portfolio gain/loss from all symbols
 print(f"\nTotal Portfolio Gain/Loss (all symbols): {total_gain_loss_all:.2f}")
+print(f"Annual Growth Rate: {annual_growth:.2f}%")
