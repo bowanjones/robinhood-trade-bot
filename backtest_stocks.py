@@ -97,8 +97,8 @@ def backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=10000):
 symbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'OKLO', 'SOUN', 'BBAI', 'WW', 'GM', 'JOBY', 'ACHR', 'APLD', 'QUBT', 'QBTS', 'ARBE', 'PLTR']
 
 # Set the start and end dates for the backtest period
-start_date = "2024-01-01"
-end_date = "2024-12-31"
+start_date = "2025-02-06"
+end_date = "2025-02-07"
 
 # Set initial cash to $10,000
 results = backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=1000)

@@ -107,7 +107,8 @@ def analyze_multiple_symbols(symbols):
     for symbol in symbols:
         action = fetch_and_analyze(symbol)
         if action:
-            print(f"{symbol}: {action}")
+            if action != "hold":
+                print(f"{symbol}: {action}")
         else:
             print(f"No action for {symbol}")
 
@@ -115,7 +116,7 @@ def analyze_multiple_symbols(symbols):
 symbols_to_analyze = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'OKLO', 'SOUN', 'BBAI', 'WW', 'GM', 'JOBY', 'ACHR', 'APLD', 'QUBT', 'QBTS', 'ARBE', 'PLTR']
 
 # Run the analysis on all symbols in the list
-while True:
-    print("Starting a new iteration...")
-    analyze_multiple_symbols(symbols_to_analyze)
-    time.sleep(60)  # Sleep for 60 seconds (1 minute) before fetching again
+# while True:
+#     print("Starting a new iteration...")
+analyze_multiple_symbols(symbols_to_analyze)
+#     time.sleep(60)  # Sleep for 60 seconds (1 minute) before fetching again
