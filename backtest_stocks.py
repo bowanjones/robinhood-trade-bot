@@ -81,9 +81,9 @@ def simple_backtest(symbol, start_date, end_date, initial_cash=10000, investment
             if gain_loss > 0:
                 print(f"\t\033[91mSell\033[0m at {current_close:.2f} on {current_date}, \033[92mGain:\033[0m {gain_loss:.2f}, Cash Flow: {cash_flow:.2f}, Total Cash: {cash:.2f}")
             elif gain_loss < 0:
-                print(f"\t\033[91mSell\033[0m at {current_close:.2f}, \033[91mLoss:\033[0m {abs(gain_loss):.2f}, Cash Flow: {cash_flow:.2f}, Total Cash: {cash:.2f}")
+                print(f"\t\033[91mSell\033[0m at {current_close:.2f} on {current_date}, \033[91mLoss:\033[0m {abs(gain_loss):.2f}, Cash Flow: {cash_flow:.2f}, Total Cash: {cash:.2f}")
             else:
-                print(f"\t\033[91mSell\033[0m at {current_close:.2f}, \033[93mNo gain or loss, Cash Flow:\033[0m {cash_flow:.2f}, Total Cash: {cash:.2f}")
+                print(f"\t\033[91mSell\033[0m at {current_close:.2f} on {current_date}, \033[93mNo gain or loss, Cash Flow:\033[0m {cash_flow:.2f}, Total Cash: {cash:.2f}")
 
         # Append portfolio info for analysis
         history.append({'date': current_date, 'cash': cash, 'position': position, 'portfolio_value': portfolio_value})
@@ -134,15 +134,15 @@ def backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=10000, 
     return total_gain_loss_all
 
 # List of symbols to backtest
-symbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'OKLO', 'SOUN', 'BBAI', 'GM', 'JOBY', 'ACHR', 'QUBT', 'QBTS', 'PLTR']
+symbols = ['DOGE-USD']#['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'OKLO', 'SOUN', 'BBAI', 'GM', 'JOBY', 'ACHR', 'QUBT', 'QBTS', 'PLTR']
 
 # Set the start and end dates for the backtest period
 start_date = "2024-01-01"
 end_date = "2025-02-07"
 
 # Set initial cash and investment per stock as variables
-initial_cash = 5000  # Total initial cash available for backtesting
-investment_per_stock = 1000  # Amount to invest per stock
+initial_cash = 10000  
+investment_per_stock = initial_cash * .2 #20% per max for risk management
 
 # Run the backtest
 total_gain_loss_all = backtest_multiple_stocks(symbols, start_date, end_date, initial_cash=initial_cash, investment_per_stock=investment_per_stock)+initial_cash

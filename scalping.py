@@ -1,0 +1,1 @@
+# buy the stock and sell once it goes up .50 cents

@@ -8,7 +8,7 @@ def fetch_and_analyze(symbol):
     current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     # Download historical data (minute data)
-    df = yf.download(symbol, period="1d", interval="1m")  # 1-minute interval for today
+    df = yf.download(symbol, period="1d", interval="1h")  # 1-minute interval for today
     print(f"Data fetched at: {current_timestamp}")
     
     # Calculate RSI (Relative Strength Index)
@@ -34,9 +34,9 @@ def fetch_and_analyze(symbol):
     
     # Check for Buy/Sell conditions based on RSI
     if latest_rsi < 30:
-        print(f"RSI below 30. Buy signal! (Timestamp: {current_timestamp})")
+        print(f"\033[92mRSI below 30. Buy signal! (Timestamp: {current_timestamp})\033[0m")
     elif latest_rsi > 70:
-        print(f"RSI above 70. Sell signal! (Timestamp: {current_timestamp})")
+        print(f"\033[91mRSI above 70. Sell signal! (Timestamp: {current_timestamp})\033[0m")
     else:
         print(f"RSI is in neutral range. No action required. (Timestamp: {current_timestamp})")
 
